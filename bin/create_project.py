@@ -60,44 +60,47 @@ def create_project(project_name, base_path=".", dry_run=False):
         "archive",
     ]
     
+    # Canonical structure block (used for dry-run output and README templates)
+    structure_block = f"""{project_name}/
+├── README.md                    # Project-level README
+├── LICENSE                      # Empty placeholder license file
+├── metadata/
+│   ├── project_metadata.txt     # Project-level information (title, PI, funding)
+│   ├── sample_metadata.csv      # Sample information (IDs, species, conditions)
+│   └── experiment_metadata.xlsx # Experimental details (protocols, reagents, dates)
+├── data/
+│   ├── raw/
+│   │   ├── sequencing/          # Raw sequencing data
+│   │   └── imaging/             # Raw imaging data
+│   ├── references/              # Reference datasets or external resources
+│   └── processed/               # Cleaned or feature-extracted data
+├── src/
+│   ├── preprocessing/           # Scripts to prepare and clean raw data
+│   ├── training/                # Model training scripts
+│   ├── evaluation/              # Evaluation scripts
+│   ├── analysis/                # Analysis scripts
+│   ├── visualization/           # Visualization scripts
+│   └── utils/                   # Utility functions
+├── results/
+│   ├── figures/                 # Plots and visualizations
+│   ├── tables/                  # Metrics and summary tables
+│   └── reports/                 # Reports or summaries of analysis
+├── docs/                        # Supporting documentation and protocols
+├── notebooks/                   # Jupyter or R notebooks
+├── configs/                     # Hyperparameters, training configs, experiment settings
+├── models/
+│   ├── checkpoints/             # Intermediate saved model states
+│   └── final_models/            # Final trained models
+├── environment/
+│   ├── environment.yml          # Environment file (empty placeholder)
+│   └── requirements.txt         # Requirements file (empty placeholder)
+├── temp/                        # Temporary files and cache
+└── archive/                     # Backup of old scripts, data, or model versions
+"""
+    
     # If dry-run, print the planned project tree and exit (no file operations)
     if dry_run:
-        tree = f"{project_name}/\n"
-        tree += "├── README.md\n"
-        tree += "├── LICENSE\n"
-        tree += "├── metadata/\n"
-        tree += "│   ├── project_metadata.txt\n"
-        tree += "│   ├── sample_metadata.csv\n"
-        tree += "│   └── experiment_metadata.xlsx\n"
-        tree += "├── docs/\n"
-        tree += "├── data/\n"
-        tree += "│   ├── raw/\n"
-        tree += "│   │   ├── sequencing/\n"
-        tree += "│   │   └── imaging/\n"
-        tree += "│   ├── references/\n"
-        tree += "│   └── processed/\n"
-        tree += "├── src/\n"
-        tree += "│   ├── preprocessing/\n"
-        tree += "│   ├── training/\n"
-        tree += "│   ├── evaluation/\n"
-        tree += "│   ├── analysis/\n"
-        tree += "│   ├── visualization/\n"
-        tree += "│   └── utils/\n"
-        tree += "├── models/\n"
-        tree += "│   ├── checkpoints/\n"
-        tree += "│   └── final_models/\n"
-        tree += "├── results/\n"
-        tree += "│   ├── figures/\n"
-        tree += "│   ├── tables/\n"
-        tree += "│   └── reports/\n"
-        tree += "├── notebooks/\n"
-        tree += "├── configs/\n"
-        tree += "├── environment/\n"
-        tree += "│   ├── environment.yml\n"
-        tree += "│   └── requirements.txt\n"
-        tree += "├── temp/\n"
-        tree += "└── archive/\n"
-        print(tree)
+        print(structure_block)
         return
 
     # Create directories (silent). Wrap mkdir in try/except to report clearer errors
@@ -114,9 +117,21 @@ def create_project(project_name, base_path=".", dry_run=False):
             print(f"Error: Failed to create directory '{dir_path}': {e}")
             sys.exit(1)
 
-    # Create an empty README.md at project root (single file)
-    with open(project_root / "README.md", "w") as f:
-        f.write("")
+    # Look for a repo-level templates/README.md next to the project root of
+    # this script. If present, format it with the project name and structure.
+    repo_root = Path(__file__).resolve().parent.parent
+    template_path = repo_root / "templates" / "README.md"
+    if template_path.exists():
+        try:
+            tpl = template_path.read_text()
+            readme_text = tpl.format(project_name=project_name, structure=structure_block)
+        except Exception:
+            # If templating fails for any reason, fall back to the default text.
+            readme_text = f"# {project_name}\n\nA standardized project layout created by create_project.py.\n\n{structure_block}\n"
+    else:
+        readme_text = f"# {project_name}\n\nA standardized project layout created by create_project.py.\n\n{structure_block}\n"
+
+    (project_root / "README.md").write_text(readme_text)
     
     # Create empty LICENSE
     with open(project_root / "LICENSE", "w") as f:
@@ -141,9 +156,8 @@ def create_project(project_name, base_path=".", dry_run=False):
         with open(p, "w") as f:
             f.write("")
     
-    # Keep configs/ empty (no default config file created)
-    
     print(f"\n✓ Project structure created successfully at: {project_root.resolve()}")
+    print(f"\nSee the README.md for an overview of the structure.")
     print(f"\nNext steps:")
     # Show the full (absolute) path when suggesting the `cd` command
     print(f"1. cd {project_root.resolve()}")

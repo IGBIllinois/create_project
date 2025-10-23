@@ -65,7 +65,7 @@ noted otherwise):
 
 ```
 $PROJECT_NAME/
-├── README.md                   	# Project-level README (empty placeholder)
+├── README.md                   	# Project-level README 
 ├── LICENSE                     	# Empty placeholder license file
 ├── metadata/
 │   ├── project_metadata.txt    	# Project-level information (title, PI, funding)
