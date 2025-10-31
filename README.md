@@ -11,9 +11,27 @@ structure.
 ## Current behavior
 
 - Creates the directory layout silently (no per-directory printouts).
-- Writes a single empty `README.md` at the project root.
+- Writes a pre-populated `README.md` at the project root (contains the project name, directory tree, and short descriptions for each folder).
 - Creates empty placeholder files in `metadata/` and `environment/`.
 - Aborts early if the target project directory already exists.
+
+## Load the module / Bioluster usage
+
+This tool is available as a module on Biocluster.
+
+- To use the installed module (recommended on Biocluster), load it first:
+	```bash
+	module load create_project
+	```
+	Then run the script with Python:
+	```bash
+	python create_project.py <project_name> [base_path]
+	```
+
+- If you cloned this repository and are running the script from the checkout, call the bundled script directly:
+	```bash
+	python bin/create_project.py <project_name> [base_path]
+	```
 
 ## CLI flags / help
 
